@@ -1,0 +1,7 @@
+# Allows you to send HTTP requests
+# https://pypi.org/project/requests/
+requests
+
+# YAML parser for Python
+# https://pypi.org/project/PyYAML/
+PyYAML

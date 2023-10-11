@@ -1,0 +1,34 @@
+2023-09-25 22:40:08,776 INFO 422 Add team k8s SRE
+2023-09-25 22:40:08,786 INFO 422 Add user o.ivanov
+2023-09-25 22:40:08,795 INFO 204 Edit user o.ivanov
+2023-09-25 22:40:08,802 INFO 422 Add user o.ivanov to team k8s SRE
+2023-09-25 22:40:08,815 INFO 201 Add duty for o.ivanov on 02/10/2023
+2023-09-25 22:40:08,824 INFO 201 Add duty for o.ivanov on 03/10/2023
+2023-09-25 22:40:08,833 INFO 201 Add duty for o.ivanov on 04/10/2023
+2023-09-25 22:40:08,881 INFO 201 Add duty for o.ivanov on 05/10/2023
+2023-09-25 22:40:08,889 INFO 201 Add duty for o.ivanov on 06/10/2023
+2023-09-25 22:40:08,893 INFO 422 Add user d.petrov
+2023-09-25 22:40:08,900 INFO 204 Edit user d.petrov
+2023-09-25 22:40:08,949 INFO 422 Add user d.petrov to team k8s SRE
+2023-09-25 22:40:09,003 INFO 201 Add duty for d.petrov on 02/10/2023
+2023-09-25 22:40:09,014 INFO 201 Add duty for d.petrov on 03/10/2023
+2023-09-25 22:40:09,025 INFO 201 Add duty for d.petrov on 04/10/2023
+2023-09-25 22:40:09,082 INFO 201 Add duty for d.petrov on 05/10/2023
+2023-09-25 22:40:09,090 INFO 201 Add duty for d.petrov on 06/10/2023
+2023-09-25 22:40:09,096 INFO 422 Add team DBA SRE
+2023-09-25 22:40:09,101 INFO 422 Add user a.seledkov
+2023-09-25 22:40:09,108 INFO 204 Edit user a.seledkov
+2023-09-25 22:40:09,158 INFO 422 Add user a.seledkov to team DBA SRE
+2023-09-25 22:40:09,169 INFO 201 Add duty for a.seledkov on 02/10/2023
+2023-09-25 22:40:09,192 INFO 201 Add duty for a.seledkov on 03/10/2023
+2023-09-25 22:40:09,202 INFO 201 Add duty for a.seledkov on 04/10/2023
+2023-09-25 22:40:09,213 INFO 201 Add duty for a.seledkov on 05/10/2023
+2023-09-25 22:40:09,274 INFO 201 Add duty for a.seledkov on 06/10/2023
+2023-09-25 22:40:09,302 INFO 422 Add user d.hludeev
+2023-09-25 22:40:09,312 INFO 204 Edit user d.hludeev
+2023-09-25 22:40:09,359 INFO 422 Add user d.hludeev to team DBA SRE
+2023-09-25 22:40:09,414 INFO 201 Add duty for d.hludeev on 02/10/2023
+2023-09-25 22:40:09,425 INFO 201 Add duty for d.hludeev on 03/10/2023
+2023-09-25 22:40:09,436 INFO 201 Add duty for d.hludeev on 04/10/2023
+2023-09-25 22:40:09,450 INFO 201 Add duty for d.hludeev on 05/10/2023
+2023-09-25 22:40:09,458 INFO 201 Add duty for d.hludeev on 06/10/2023
