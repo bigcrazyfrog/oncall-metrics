@@ -1,0 +1,18 @@
+global:
+  scrape_interval: "15s" # Set the scrape interval to every 15 seconds.
+  evaluation_interval: "5s" # Evaluate rules every 15 seconds.
+
+# A list of scrape configurations.
+scrape_configs:
+  # Make Prometheus scrape itself for metrics.
+  - job_name: "prometheus"
+    static_configs:
+      - targets: [ "host.docker.internal:9090" ]
+
+  # Make metrics for oncall-web.
+  - job_name: "oncall-web"
+    # We use custom path. Prometheus uses /metrics as default.
+    metrics_path: /
+    static_configs:
+      - targets:
+          [ "oncall-web:8081" ]

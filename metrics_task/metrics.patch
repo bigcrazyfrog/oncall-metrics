@@ -1,0 +1,126 @@
+commit fba0e1fd01338c1b43301c0ea085299cd1e56131
+Author: bigcrazyfrog <cibinnikita@gmail.com>
+Date:   Wed Oct 3 19:31:52 2023 +0500
+
+    Task 5.2
+
+diff --git a/Dockerfile b/Dockerfile
+index d9675a8..714bd57 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -28,6 +28,6 @@ COPY db /home/oncall/db
+ COPY configs /home/oncall/config
+ COPY ops/entrypoint.py /home/oncall/entrypoint.py
+ 
+-EXPOSE 8080
++EXPOSE 8080 8081
+ 
+ CMD ["sudo", "-EHu", "oncall", "bash", "-c", "source /home/oncall/env/bin/activate && python -u /home/oncall/entrypoint.py"]
+diff --git a/configs/config.docker.yaml b/configs/config.docker.yaml
+index 76d4354..fe9e0f0 100644
+--- a/configs/config.docker.yaml
++++ b/configs/config.docker.yaml
+@@ -3,7 +3,10 @@ server:
+   port: 8080
+ debug: True
+ oncall_host: http://localhost:8080
+-metrics: dummy
++metrics: prometheus
++prometheus:
++  oncall-notifier:
++    server_port: 8081
+ db:
+   conn:
+     kwargs:
+diff --git a/configs/config.yaml b/configs/config.yaml
+index 9abfd74..c370fd9 100644
+--- a/configs/config.yaml
++++ b/configs/config.yaml
+@@ -5,7 +5,10 @@ server:
+   host: 0.0.0.0
+   port: 8080
+ oncall_host: http://localhost:8080
+-metrics: dummy
++metrics: prometheus
++prometheus:
++  oncall-notifier:
++    server_port: 8081
+ db:
+   conn:
+     kwargs:
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 3dc81dc..93592c2 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -6,6 +6,7 @@ services:
+     hostname: oncall
+     ports:
+       - "8080:8080"
++      - "8081:8081"
+     environment:
+       - DOCKER_DB_BOOTSTRAP=1
+       - IRIS_API_HOST=iris
+@@ -13,7 +14,7 @@ services:
+       - ./configs/config.docker.yaml:/home/oncall/config/config.yaml
+     networks:
+       - iris
+-  
++
+   oncall-mysql:
+     hostname: oncall-mysql
+     image: mysql:5.7
+@@ -22,6 +23,15 @@ services:
+     networks:
+       - iris
+ 
++  oncall-prometheus:
++    image: prom/prometheus:v2.36.0
++    ports:
++      - "9090:9090"
++    volumes:
++      - ./prometheus.yml:/etc/prometheus/prometheus.yml
++    networks:
++      - iris
++
+ networks:
+   iris:
+     name: iris
+diff --git a/prometheus.yml b/prometheus.yml
+new file mode 100644
+index 0000000..f7a45bd
+--- /dev/null
++++ b/prometheus.yml
+@@ -0,0 +1,18 @@
++global:
++  scrape_interval: "15s" # Set the scrape interval to every 15 seconds.
++  evaluation_interval: "5s" # Evaluate rules every 15 seconds.
++
++# A list of scrape configurations.
++scrape_configs:
++  # Make Prometheus scrape itself for metrics.
++  - job_name: "prometheus"
++    static_configs:
++      - targets: [ "host.docker.internal:9090" ]
++
++  # Make metrics for oncall-web.
++  - job_name: "oncall-web"
++    # We use custom path. Prometheus uses /metrics as default.
++    metrics_path: /
++    static_configs:
++      - targets:
++          [ "oncall-web:8081" ]
+\ No newline at end of file
+diff --git a/setup.py b/setup.py
+index fe8b260..dc598d6 100644
+--- a/setup.py
++++ b/setup.py
+@@ -48,7 +48,8 @@ setuptools.setup(
+         'slackclient==1.3.1',
+         'icalendar',
+         'pymsteams',
+-        'idna==2.10'
++        'idna==2.10',
++        'prometheus-client',
+     ],
+     extras_require={
+         'ldap': ['python-ldap'],
