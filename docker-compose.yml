@@ -1,11 +1,18 @@
-version: '3'
+version: '3.9'
 
 services:
   oncall-web:
-    build: .
+    build:
+      context: .
+      labels:
+        com.example.description: "Accounting webapp"
+        prometheus-metrics: "prometheus-metrics"
+        prometheus: "prometheus"
+        prometheus-job: "prometheus-job"
     hostname: oncall
     ports:
       - "8080:8080"
+      - "8081:8081"
     environment:
       - DOCKER_DB_BOOTSTRAP=1
       - IRIS_API_HOST=iris
@@ -13,7 +20,7 @@ services:
       - ./configs/config.docker.yaml:/home/oncall/config/config.yaml
     networks:
       - iris
-  
+
   oncall-mysql:
     hostname: oncall-mysql
     image: mysql:5.7
@@ -21,6 +28,45 @@ services:
       - MYSQL_ROOT_PASSWORD=1234
     networks:
       - iris
+
+  oncall-metrics:
+    build:
+      context: ./metrics/
+      labels:
+        com.example.description: "Accounting webapp"
+        prometheus-metrics: "prometheus-metrics"
+        prometheus: "prometheus"
+        prometheus-job: "prometheus-job"
+    ports:
+      - "8090:8090"
+    environment:
+      - HOST=oncall-web
+      - PORT=8090
+    networks:
+      - iris
+
+  oncall-prometheus:
+    image: prom/prometheus:v2.36.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - iris
+
+  blackbox:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/blackbox/blackbox.yml"
+    volumes:
+      - ./blackbox.yml:/etc/blackbox/blackbox.yml
+    networks:
+      - iris
+
 
 networks:
   iris:

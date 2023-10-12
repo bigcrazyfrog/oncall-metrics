@@ -1,0 +1,82 @@
+global:
+  scrape_interval: "15s" # Set the scrape interval to every 15 seconds.
+  evaluation_interval: "5s" # Evaluate rules every 15 seconds.
+
+# A list of scrape configurations.
+scrape_configs:
+  # Make Prometheus scrape itself for metrics.
+  - job_name: "prometheus"
+    static_configs:
+      - targets: [ "host.docker.internal:9090" ]
+
+  # Make metrics for oncall-web.
+  - job_name: 'oncall-web'
+    metrics_path: /
+    dns_sd_configs:
+      - names: [ 'oncall-web' ]
+        type: 'A'
+        port: 8081
+
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [ http ]
+    dns_sd_configs:
+      - names:
+          - oncall-web
+        type: A
+        port: 8081
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ __param_target ]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: 'blackbox-tcp'
+    metrics_path: /probe
+    params:
+      module: [ tcp ]
+    dns_sd_configs:
+      - names:
+          - oncall-web
+        type: A
+        port: 8081
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ __param_target ]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: 'blackbox-icmp'
+    metrics_path: /probe
+    params:
+      module: [ icmp ]
+    static_configs:
+      - targets:
+          - oncall-web
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ __param_target ]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: 'blackbox-dns'
+    metrics_path: /probe
+    params:
+      module: [ dns ]
+    static_configs:
+      - targets:
+          - 127.0.0.11
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ __param_target ]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115

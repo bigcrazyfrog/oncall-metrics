@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Final
+import os
 import time
 import requests
 import uvicorn as uvicorn
@@ -7,8 +8,8 @@ from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
 # Host and port of server
-HOST: str = "localhost"
-PORT: str = "8080"
+HOST: str = os.environ.get("HOST", "localhost")
+PORT: str = os.environ.get("PORT", "8080")
 
 # We use http because debug mode is assumed
 BASE_URL: str = f"http://{HOST}:{PORT}"
@@ -58,7 +59,7 @@ app = FastAPI()
 
 
 @app.get("/metrics")
-def read_root():
+def get_duty_metrics():
     try:
         return PlainTextResponse(get_formatted_response())
     except Exception as e:
