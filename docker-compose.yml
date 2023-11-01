@@ -29,21 +29,21 @@ services:
     networks:
       - iris
 
-  oncall-metrics:
-    build:
-      context: ./metrics/
-      labels:
-        com.example.description: "Accounting webapp"
-        prometheus-metrics: "prometheus-metrics"
-        prometheus: "prometheus"
-        prometheus-job: "prometheus-job"
-    ports:
-      - "8090:8090"
-    environment:
-      - HOST=oncall-web
-      - PORT=8090
-    networks:
-      - iris
+#  oncall-metrics:
+#    build:
+#      context: ./metrics/
+#      labels:
+#        com.example.description: "Accounting webapp"
+#        prometheus-metrics: "prometheus-metrics"
+#        prometheus: "prometheus"
+#        prometheus-job: "prometheus-job"
+#    ports:
+#      - "8090:8090"
+#    environment:
+#      - HOST=oncall-web
+#      - PORT=8090
+#    networks:
+#      - iris
 
   oncall-prometheus:
     image: prom/prometheus:v2.36.0
@@ -66,6 +66,24 @@ services:
       - ./blackbox.yml:/etc/blackbox/blackbox.yml
     networks:
       - iris
+
+  grafana:
+    image: grafana/grafana:8.5.3-ubuntu
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - grafana-configs:/etc/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: "/etc/grafana/dashboards/blackbox.json"
+    networks:
+      - iris
+
+volumes:
+  grafana-data:
+  grafana-configs:
 
 
 networks:
