@@ -16,6 +16,10 @@ scrape_configs:
       - names: [ 'oncall-web' ]
         type: 'A'
         port: 8081
+    
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: [ "node-exporter:9100" ]
 
   - job_name: 'blackbox-http'
     metrics_path: /probe
@@ -80,3 +84,4 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox:9115
+
