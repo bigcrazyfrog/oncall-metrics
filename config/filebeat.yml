@@ -4,16 +4,15 @@ filebeat.inputs:
     - '/var/lib/docker/containers/*/*.log'
 
 processors:
-- add_docker_metadata:
-    host: "unix:///var/run/docker.sock"
+- add_docker_metadata: ~
 
 - decode_json_fields:
     fields: ["message"]
     target: "json"
     overwrite_keys: true
 
-output.logstash:
-  hosts: ["elk-logstash:5044"]
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
   indices:
     - index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
 

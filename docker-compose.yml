@@ -1,6 +1,4 @@
 version: '3.9'
-
-
 services:
   oncall-mysql:
     hostname: oncall-mysql
@@ -38,102 +36,96 @@ services:
 #    networks:
 #      - iris
 
-  # oncall-prometheus:
-  #   image: prom/prometheus:v2.36.0
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   networks:
-  #     - iris
+  custom-exporter:
+    build:
+     context: ./custom_exporter/
+    ports:
+     - "8082:8082"
+    networks:
+     - iris
+    depends_on:
+      - oncall-web
 
-  # blackbox:
-  #   image: prom/blackbox-exporter
-  #   ports:
-  #     - "9115:9115"
-  #   restart: unless-stopped
-  #   command:
-  #     - "--config.file=/etc/blackbox/blackbox.yml"
-  #   volumes:
-  #     - ./blackbox.yml:/etc/blackbox/blackbox.yml
-  #   networks:
-  #     - iris
-      
-  # node-exporter:
-  #   image: prom/node-exporter:v1.3.1
-  #   ports:
-  #     - "9100:9100"
-  #   volumes:
-  #     - /proc:/host/proc:ro
-  #     - /sys:/host/sys:ro
-  #     - /:/rootfs:ro
-  #   command:
-  #     - '--path.procfs=/host/proc'
-  #     - '--path.sysfs=/host/sys'
-  #     - '--collector.filesystem.mount-points-exclude'
-  #     - '^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
-  #   networks:
-  #     - iris
+  oncall-prometheus:
+    image: prom/prometheus:v2.36.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - iris
 
-  # grafana:
-  #   build: './grafana'
-  #   container_name: 'grafana'
-  #   ports:
-  #     - '3000:3000'
-  #   # environment:
-  #   #  - GF_INSTALL_PLUGINS="Time series"
-  #   networks:
-  #     - iris
+  blackbox:
+    image: prom/blackbox-exporter
+    ports:
+      - "9115:9115"
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/blackbox/blackbox.yml"
+    volumes:
+      - ./blackbox.yml:/etc/blackbox/blackbox.yml
+    networks:
+      - iris
 
-  # ********************************************************************************* 
+  grafana:
+    build: './grafana'
+    container_name: 'grafana'
+    ports:
+      - '3000:3000'
+    networks:
+      - iris
 
   elasticsearch:
-    image: elasticsearch:7.9.1
-    container_name: elk-elasticsearch
-    volumes:
-      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-    restart: unless-stopped
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.9.1"
+    environment:
+        - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+        - "discovery.type=single-node"
     ports:
-      - 9200:9200
-    networks:
-      - iris
-
-  logstash:
-    image: logstash:7.9.1
-    container_name: elk-logstash
-    restart: unless-stopped
+        - "9200:9200"
     volumes:
-      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-    depends_on:
-      - elasticsearch
-    networks:
-      - iris
-
-  filebeat:
-    image: elastic/filebeat:7.9.1
-    restart: unless-stopped
-    depends_on:
-      - elasticsearch
-    volumes:
-      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./logs/:/logs/
+        - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - iris
 
   kibana:
-    image: kibana:7.9.1
-    restart: unless-stopped
-    depends_on:
-      - elasticsearch
+    image: "docker.elastic.co/kibana/kibana:7.9.1"
     ports:
-      - 5601:5601
+        - "5601:5601"
     networks:
       - iris
+
+  filebeat:
+    image: "docker.elastic.co/beats/filebeat:7.9.1"
+    user: root
+    volumes:
+        - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+        - /var/lib/docker:/var/lib/docker
+        - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - iris
+
+  node-exporter:
+    image: prom/node-exporter:v1.3.1
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude'
+      - '^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    networks:
+      - iris
+
 
 # **********************************************
 
 volumes:
+  elasticsearch_data:
   grafana-data:
   grafana-configs:
 
